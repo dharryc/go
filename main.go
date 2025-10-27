@@ -119,12 +119,10 @@ func demonstrateGoroutines() {
 	start := time.Now()
 
 	// Spin up 10 million goroutines
-	for i := 0; i < numGoroutines; i++ {
-		wg.Add(1)
-		go func() {
-			defer wg.Done()
+	for range numGoroutines {
+		wg.Go(func() {
 			counter.Add(1)
-		}()
+		})
 	}
 
 	// Wait for all goroutines to finish
