@@ -5,6 +5,9 @@ package main
 import (
 	"fmt"
 	m "math/rand"
+	"sync"
+	"sync/atomic"
+	"time"
 )
 
 func main() {
@@ -17,7 +20,7 @@ func main() {
 	// part 2 setup
 	basketBallPoints := []int{}
 	for range 3 {
-		basketBallPoints = append(basketBallPoints, 1 + m.Intn(6))
+		basketBallPoints = append(basketBallPoints, 1+m.Intn(6))
 	}
 
 	// part 1 running
@@ -37,6 +40,10 @@ func main() {
 			fmt.Println()
 		}
 	}
+
+	//also, just because they're cool, goroutines:
+	fmt.Println("\nSpinning up 10 million goroutines")
+	demonstrateGoroutines()
 }
 
 /*
@@ -67,7 +74,7 @@ func basketballPointCombinations(score int) [][]int {
 		go func(start int) {
 			localResults := [][]int{}
 			current := []int{start}
-			findCombinations(score - start, current, &localResults)
+			findCombinations(score-start, current, &localResults)
 			resultsChan <- localResults
 		}(startPoint)
 	}
@@ -98,4 +105,32 @@ func findCombinations(remaining int, current []int, results *[][]int) {
 		findCombinations(remaining-points, current, results)
 		current = current[:len(current)-1]
 	}
+}
+
+/*
+Demonstrate how lightweight goroutines are by spinning up 10 million of them.
+Each goroutine increments a counter and sends a signal when done.
+*/
+func demonstrateGoroutines() {
+	const numGoroutines = 10_000_000
+	var wg sync.WaitGroup
+	var counter atomic.Int64
+
+	start := time.Now()
+
+	// Spin up 10 million goroutines
+	for i := 0; i < numGoroutines; i++ {
+		wg.Add(1)
+		go func() {
+			defer wg.Done()
+			counter.Add(1)
+		}()
+	}
+
+	// Wait for all goroutines to finish
+	wg.Wait()
+
+	elapsed := time.Since(start)
+	fmt.Printf("Created and ran %d goroutines in %v\n", numGoroutines, elapsed)
+	fmt.Printf("Counter value: %d (guaranteed to be exactly %d)\n", counter.Load(), numGoroutines)
 }
