@@ -17,7 +17,7 @@ func main() {
 	// part 2 setup
 	basketBallPoints := []int{}
 	for range 3 {
-		basketBallPoints = append(basketBallPoints, m.Intn(8))
+		basketBallPoints = append(basketBallPoints, 1 + m.Intn(6))
 	}
 
 	// part 1 running
@@ -26,7 +26,8 @@ func main() {
 	}
 
 	//part 2 running
-	for _, score := range basketBallPoints {
+	for i := range len(basketBallPoints) {
+		score := basketBallPoints[i]
 		fmt.Printf("\nScore: %d\n", score)
 		combinations := basketballPointCombinations(score)
 		for _, combo := range combinations {
@@ -66,13 +67,13 @@ func basketballPointCombinations(score int) [][]int {
 		go func(start int) {
 			localResults := [][]int{}
 			current := []int{start}
-			findCombinations(score-start, current, &localResults)
+			findCombinations(score - start, current, &localResults)
 			resultsChan <- localResults
 		}(startPoint)
 	}
 
 	allResults := [][]int{}
-	for i := 0; i < 3; i++ {
+	for range 3 {
 		results := <-resultsChan
 		allResults = append(allResults, results...)
 	}
